@@ -1,0 +1,123 @@
+{% extends "dashboard/base_dash.html" %}
+{% block page_title %}Analyze Text{% endblock %}
+{% block dash_extra_css %}
+<style>
+.analyze-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;}
+@media(max-width:960px){.analyze-grid{grid-template-columns:1fr;}}
+.panel{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;}
+.ph{padding:1.1rem 1.4rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.7rem;}
+.ph-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.85rem;}
+.ph h3{font-size:.95rem;font-weight:800;}
+.pb{padding:1.4rem;}
+.ta{width:100%;background:rgba(255,255,255,.03);border:1.5px solid rgba(91,141,238,.16);border-radius:11px;padding:.9rem 1rem;color:var(--text);font-size:.875rem;resize:vertical;min-height:210px;outline:none;line-height:1.7;transition:.25s;}
+.ta:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(91,141,238,.1);}
+.cc{font-size:.75rem;color:var(--muted);text-align:right;margin-top:.4rem;}
+.samples{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.9rem;}
+.sample-btn{background:rgba(255,255,255,.03);border:1px solid var(--border);color:var(--muted);padding:.3rem .65rem;border-radius:8px;font-size:.74rem;cursor:pointer;transition:.2s;}
+.sample-btn:hover{border-color:var(--blue);color:var(--blue);}
+.analyze-btn{width:100%;padding:.82rem;background:var(--grad);border:none;border-radius:11px;color:#fff;font-size:.97rem;font-weight:700;cursor:pointer;margin-top:1rem;transition:.25s;}
+.analyze-btn:hover{opacity:.88;box-shadow:0 8px 28px rgba(91,141,238,.35);}
+/* Result */
+.result-hero{text-align:center;padding:1.4rem;border-bottom:1px solid var(--border);}
+.rh-ring{width:88px;height:88px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:2rem;margin:0 auto .7rem;box-shadow:0 0 0 8px rgba(91,141,238,.1);}
+.rh-name{font-size:1.35rem;font-weight:900;margin-bottom:.25rem;}
+.rh-sub{font-size:.82rem;color:var(--muted2);}
+.conf-wrap{margin:1rem 1.4rem;}
+.conf-lbl{display:flex;justify-content:space-between;font-size:.78rem;color:var(--muted);margin-bottom:.4rem;}
+.conf-track{height:6px;background:rgba(255,255,255,.07);border-radius:50px;overflow:hidden;}
+.conf-fill{height:100%;background:var(--grad);border-radius:50px;}
+.scores-wrap{padding:.2rem 1.4rem .5rem;}
+.scores-lbl{font-size:.68rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:700;margin-bottom:.5rem;}
+.score-row{display:flex;align-items:center;gap:.7rem;margin-bottom:.4rem;}
+.sr-name{font-size:.79rem;color:var(--muted2);width:95px;flex-shrink:0;}
+.sr-track{flex:1;height:5px;background:rgba(255,255,255,.06);border-radius:50px;overflow:hidden;}
+.sr-fill{height:100%;border-radius:50px;}
+.sr-pct{font-size:.74rem;color:var(--muted);width:35px;text-align:right;}
+.emo-chips{display:flex;flex-wrap:wrap;gap:.4rem;padding:.2rem 1.4rem 1rem;}
+.ec{display:inline-flex;align-items:center;gap:.35rem;padding:.28rem .8rem;border-radius:50px;font-size:.76rem;font-weight:600;border:1px solid;}
+.rec{margin:0 1.4rem 1.4rem;padding:.9rem 1rem;background:rgba(91,141,238,.07);border:1px solid rgba(91,141,238,.18);border-radius:11px;font-size:.84rem;line-height:1.65;color:var(--muted2);}
+.placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:280px;color:var(--muted);gap:.9rem;text-align:center;}
+.placeholder i{font-size:2.8rem;opacity:.18;}
+</style>
+{% endblock %}
+{% block dash_content %}
+<div class="analyze-grid">
+  <!-- Input -->
+  <div class="panel">
+    <div class="ph">
+      <div class="ph-icon" style="background:rgba(91,141,238,.15);color:var(--blue);"><i class="fas fa-keyboard"></i></div>
+      <h3>Enter Your Text</h3>
+    </div>
+    <div class="pb">
+      <form method="POST">
+        <textarea name="text" id="ta" class="ta" placeholder="Type or paste any message, email, conversation or text to analyze your personality and emotions…" required>{{ input_text }}</textarea>
+        <div class="cc"><span id="cc">{{ input_text|length }}</span> characters</div>
+        <div style="font-size:.77rem;color:var(--muted);margin-top:.9rem;margin-bottom:.4rem;">Quick samples:</div>
+        <div class="samples">
+          {% for s in ["I really appreciate your help, thank you!","Please submit the report by end of day.","This is absolutely unacceptable — fix it NOW!","I feel really sad and overwhelmed today.","The data clearly shows a 15% growth in Q3.","I'm so excited about this new opportunity!"] %}
+          <button type="button" class="sample-btn" onclick="setSample(this.dataset.t)" data-t="{{s}}">{{s[:28]}}…</button>
+          {% endfor %}
+        </div>
+        <button type="submit" class="analyze-btn"><i class="fas fa-brain" style="margin-right:.4rem;"></i>Analyze Personality</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Result -->
+  <div class="panel">
+    <div class="ph">
+      <div class="ph-icon" style="background:rgba(139,92,246,.15);color:var(--purple);"><i class="fas fa-chart-pie"></i></div>
+      <h3>AI Analysis Result</h3>
+    </div>
+    {% if result %}
+    {% set pc={'Friendly':'#22c55e','Professional':'#5b8dee','Aggressive':'#ef4444','Emotional':'#f472b6','Analytical':'#8b5cf6','Assertive':'#f59e0b','Reserved':'#6366f1','Extrovert':'#22d3ee','Introvert':'#a78bfa'} %}
+    {% set c=pc.get(result.personality_type,'#5b8dee') %}
+    {% set ec={'Happy':'#22c55e','Sad':'#60a5fa','Angry':'#ef4444','Neutral':'#94a3b8','Excited':'#f59e0b','Frustrated':'#f97316','Confused':'#a78bfa'} %}
+    {% set emojis={'Friendly':'😊','Professional':'👔','Aggressive':'💢','Emotional':'💖','Analytical':'🧠','Assertive':'💪','Reserved':'🤫','Extrovert':'🌟','Introvert':'🌙'} %}
+    <div class="result-hero">
+      <div class="rh-ring">{{ emojis.get(result.personality_type,'🧠') }}</div>
+      <div class="rh-name" style="color:{{c}};">{{ result.personality_type }}</div>
+      <div class="rh-sub">Emotion: <strong style="color:{{ ec.get(result.emotion,'#5b8dee') }};">{{ result.emotion }}</strong> &nbsp;·&nbsp; Tone: <strong>{{ result.tone }}</strong> &nbsp;·&nbsp; {{ result.word_count }} words</div>
+    </div>
+    <div class="conf-wrap">
+      <div class="conf-lbl"><span>AI Confidence</span><span>{{ (result.confidence*100)|round(1) }}%</span></div>
+      <div class="conf-track"><div class="conf-fill" style="width:{{ (result.confidence*100)|round(1) }}%;"></div></div>
+    </div>
+    <div class="scores-wrap">
+      <div class="scores-lbl">Personality Scores</div>
+      {% set score_colors={'Friendly':'#22c55e','Professional':'#5b8dee','Aggressive':'#ef4444','Emotional':'#f472b6','Analytical':'#8b5cf6','Assertive':'#f59e0b'} %}
+      {% for name,sc in result.personality_scores.items() %}
+      <div class="score-row">
+        <div class="sr-name">{{ name }}</div>
+        <div class="sr-track"><div class="sr-fill" style="width:{{sc}}%;background:{{score_colors.get(name,'#5b8dee')}};"></div></div>
+        <div class="sr-pct">{{sc}}%</div>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="scores-wrap" style="margin-top:.4rem;">
+      <div class="scores-lbl">Emotion Breakdown</div>
+    </div>
+    <div class="emo-chips">
+      {% set estyles={'Happy':('#22c55e','😊'),'Sad':('#60a5fa','😢'),'Angry':('#ef4444','😠'),'Neutral':('#94a3b8','😐'),'Excited':('#f59e0b','🤩'),'Frustrated':('#f97316','😤'),'Confused':('#a78bfa','😕')} %}
+      {% for emo,sc in result.emotion_scores.items() if sc>7 %}
+      {% set es=estyles.get(emo,('#5b8dee','💬')) %}
+      <span class="ec" style="background:{{es[0]}}15;border-color:{{es[0]}}38;color:{{es[0]}};">{{es[1]}} {{emo}} {{sc}}%</span>
+      {% endfor %}
+    </div>
+    <div class="rec"><i class="fas fa-lightbulb" style="color:var(--blue);margin-right:.4rem;"></i>{{ result.recommendation }}</div>
+    {% else %}
+    <div class="placeholder">
+      <i class="fas fa-brain"></i>
+      <div><strong style="display:block;margin-bottom:.3rem;">No Analysis Yet</strong><span style="font-size:.85rem;">Enter text and click "Analyze Personality"</span></div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+const ta=document.getElementById('ta'),cc=document.getElementById('cc');
+ta.addEventListener('input',()=>cc.textContent=ta.value.length);
+function setSample(t){ta.value=t;cc.textContent=t.length;ta.focus();}
+</script>
+{% endblock %}

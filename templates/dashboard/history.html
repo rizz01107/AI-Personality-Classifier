@@ -1,0 +1,60 @@
+{% extends "dashboard/base_dash.html" %}
+{% block page_title %}Analysis History{% endblock %}
+{% block dash_extra_css %}
+<style>
+.hist-wrap{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;}
+.hw-hdr{padding:1.1rem 1.4rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.hw-hdr h3{font-size:.95rem;font-weight:800;}
+.count-pill{background:rgba(91,141,238,.12);color:var(--blue);padding:.2rem .75rem;border-radius:50px;font-size:.75rem;font-weight:700;}
+table{width:100%;border-collapse:collapse;}
+th{padding:.7rem 1.2rem;font-size:.72rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:700;text-align:left;background:rgba(255,255,255,.02);border-bottom:1px solid var(--border);}
+td{padding:.82rem 1.2rem;font-size:.855rem;border-bottom:1px solid rgba(255,255,255,.04);}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(91,141,238,.03);}
+.tp{max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted2);}
+.hb{display:inline-block;padding:.22rem .72rem;border-radius:50px;font-size:.73rem;font-weight:700;}
+.mini-bar{width:55px;height:5px;background:rgba(255,255,255,.07);border-radius:50px;overflow:hidden;display:inline-block;}
+.mini-fill{height:100%;border-radius:50px;}
+.empty{padding:3rem;text-align:center;color:var(--muted);}
+.empty i{font-size:2.5rem;opacity:.18;display:block;margin-bottom:.9rem;}
+</style>
+{% endblock %}
+{% block dash_content %}
+<div class="hist-wrap">
+  <div class="hw-hdr">
+    <h3><i class="fas fa-history" style="color:var(--blue);margin-right:.5rem;"></i>All Analyses</h3>
+    <span class="count-pill">{{ analyses|length }} records</span>
+  </div>
+  {% if analyses %}
+  <div style="overflow-x:auto;">
+    <table>
+      <thead><tr><th>#</th><th>Text Preview</th><th>Personality</th><th>Emotion</th><th>Tone</th><th>Confidence</th><th>Date</th></tr></thead>
+      <tbody>
+        {% set pc={'Friendly':'#22c55e','Professional':'#5b8dee','Aggressive':'#ef4444','Emotional':'#f472b6','Analytical':'#8b5cf6','Assertive':'#f59e0b','Reserved':'#6366f1','Extrovert':'#22d3ee','Introvert':'#a78bfa'} %}
+        {% set ec={'Happy':'#22c55e','Sad':'#60a5fa','Angry':'#ef4444','Neutral':'#94a3b8','Excited':'#f59e0b','Frustrated':'#f97316','Confused':'#a78bfa'} %}
+        {% for a in analyses %}
+        {% set c=pc.get(a.personality_type,'#5b8dee') %}
+        {% set ce=ec.get(a.emotion,'#5b8dee') %}
+        <tr>
+          <td style="color:var(--muted);">{{ loop.index }}</td>
+          <td><div class="tp">{{ a.input_text }}</div></td>
+          <td><span class="hb" style="background:{{c}}1a;color:{{c}};">{{ a.personality_type }}</span></td>
+          <td><span class="hb" style="background:{{ce}}1a;color:{{ce}};">{{ a.emotion }}</span></td>
+          <td style="color:{% if a.tone=='Positive' %}#22c55e{% elif a.tone=='Negative' %}#ef4444{% else %}#94a3b8{% endif %};">{{ a.tone }}</td>
+          <td>
+            <div style="display:flex;align-items:center;gap:.5rem;">
+              <div class="mini-bar"><div class="mini-fill" style="width:{{ (a.confidence*100)|int }}%;background:{{c}};"></div></div>
+              <span style="font-size:.75rem;color:var(--muted);">{{ (a.confidence*100)|round(0)|int }}%</span>
+            </div>
+          </td>
+          <td style="color:var(--muted);white-space:nowrap;font-size:.8rem;">{{ a.created_at.strftime('%b %d, %Y') }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty"><i class="fas fa-history"></i><p>No analyses yet. <a href="{{ url_for('dashboard.analyze') }}" style="color:var(--blue);">Analyze your first text</a> to see history.</p></div>
+  {% endif %}
+</div>
+{% endblock %}

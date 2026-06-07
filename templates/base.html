@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>{% block title %}AI Personality Classifier{% endblock %} | GCUF FYP</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+:root{
+  --bg:#07071c;--bg2:#0c0c22;--card:#10102a;--card2:#141435;
+  --blue:#5b8dee;--purple:#8b5cf6;--cyan:#22d3ee;--pink:#f472b6;
+  --green:#22c55e;--orange:#f97316;--yellow:#f59e0b;
+  --border:rgba(91,141,238,.16);--border2:rgba(91,141,238,.08);
+  --text:#dde3f8;--muted:#6d7899;--muted2:#9aa3c0;
+  --grad:linear-gradient(135deg,#5b8dee,#8b5cf6);
+  --grad2:linear-gradient(135deg,#f472b6,#8b5cf6);
+  --grad3:linear-gradient(135deg,#22d3ee,#5b8dee);
+  --font:'Segoe UI',system-ui,-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;
+  --radius:14px;--radius-lg:20px;--radius-sm:8px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;line-height:1.6;}
+a{color:inherit;text-decoration:none;}
+img{max-width:100%;}
+input,textarea,select,button{font-family:var(--font);}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;gap:.45rem;border:none;border-radius:50px;font-weight:700;cursor:pointer;transition:all .25s;letter-spacing:.01em;}
+.btn-primary{background:var(--grad);color:#fff;padding:.65rem 1.7rem;font-size:.9rem;}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(91,141,238,.4);opacity:.9;}
+.btn-outline{background:transparent;border:1.5px solid var(--blue);color:var(--blue);padding:.63rem 1.7rem;font-size:.9rem;}
+.btn-outline:hover{background:var(--blue);color:#fff;box-shadow:0 6px 20px rgba(91,141,238,.3);}
+.btn-sm{padding:.4rem 1rem;font-size:.8rem;}
+.btn-danger{background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#fca5a5;padding:.4rem 1rem;font-size:.8rem;border-radius:50px;cursor:pointer;transition:.2s;}
+.btn-danger:hover{background:rgba(239,68,68,.3);}
+
+/* Utilities */
+.glow-text{background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.glow-text2{background:var(--grad2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);}
+.card-lg{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);}
+.badge{display:inline-flex;align-items:center;gap:.3rem;padding:.22rem .75rem;border-radius:50px;font-size:.75rem;font-weight:600;}
+.section-label{font-size:.72rem;letter-spacing:.15em;text-transform:uppercase;font-weight:700;color:var(--blue);margin-bottom:.6rem;}
+.section-title{font-size:clamp(1.7rem,3vw,2.6rem);font-weight:900;letter-spacing:-.025em;line-height:1.18;margin-bottom:.9rem;}
+.section-sub{color:var(--muted2);line-height:1.75;font-size:.96rem;}
+
+/* Grid helpers */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem;}
+@media(max-width:1100px){.grid-4{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:768px){.grid-2,.grid-3{grid-template-columns:1fr;}.grid-4{grid-template-columns:1fr 1fr;}}
+@media(max-width:480px){.grid-4{grid-template-columns:1fr;}}
+
+/* Flash */
+.flash-wrap{position:fixed;top:80px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:.5rem;pointer-events:none;}
+.flash-msg{padding:.75rem 1.2rem;border-radius:12px;font-size:.85rem;backdrop-filter:blur(14px);border:1px solid;pointer-events:all;animation:fin .3s ease;max-width:320px;}
+.flash-success{background:rgba(34,197,94,.15);border-color:rgba(34,197,94,.4);color:#86efac;}
+.flash-danger{background:rgba(239,68,68,.15);border-color:rgba(239,68,68,.4);color:#fca5a5;}
+.flash-warning{background:rgba(245,158,11,.15);border-color:rgba(245,158,11,.4);color:#fde68a;}
+.flash-info{background:rgba(91,141,238,.15);border-color:rgba(91,141,238,.4);color:#93c5fd;}
+@keyframes fin{from{transform:translateX(40px);opacity:0}to{transform:none;opacity:1}}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:var(--bg2);}
+::-webkit-scrollbar-thumb{background:rgba(91,141,238,.3);border-radius:10px;}
+::-webkit-scrollbar-thumb:hover{background:rgba(91,141,238,.5);}
+</style>
+{% block extra_css %}{% endblock %}
+</head>
+<body>
+<div class="flash-wrap">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for cat, msg in messages %}
+    <div class="flash-msg flash-{{cat}}"><i class="fas fa-circle-info" style="margin-right:.4rem;"></i>{{msg}}</div>
+    {% endfor %}
+  {% endwith %}
+</div>
+{% block content %}{% endblock %}
+{% block extra_js %}{% endblock %}
+<script>
+document.querySelectorAll('.flash-msg').forEach(el=>{
+  setTimeout(()=>{el.style.transition='.4s';el.style.opacity='0';},4000);
+  setTimeout(()=>el.remove(),4400);
+});
+</script>
+</body>
+</html>

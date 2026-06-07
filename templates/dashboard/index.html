@@ -1,0 +1,82 @@
+{% extends "dashboard/base_dash.html" %}
+{% block page_title %}Overview{% endblock %}
+{% block dash_extra_css %}
+<style>
+.welcome{background:linear-gradient(135deg,rgba(91,141,238,.13),rgba(139,92,246,.1));border:1px solid rgba(91,141,238,.2);border-radius:20px;padding:1.8rem 2rem;margin-bottom:2rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;}
+.welcome h2{font-size:1.5rem;font-weight:900;letter-spacing:-.02em;margin-bottom:.3rem;}
+.welcome p{color:var(--muted2);font-size:.9rem;}
+.quick-links{display:flex;gap:.7rem;flex-wrap:wrap;margin-top:1rem;}
+.ql{display:inline-flex;align-items:center;gap:.45rem;padding:.45rem 1.1rem;border-radius:50px;font-size:.82rem;font-weight:600;border:1px solid;transition:.2s;cursor:pointer;}
+.ql-p{background:var(--grad);border-color:transparent;color:#fff;}
+.ql-s{background:transparent;border-color:var(--border);color:var(--muted2);}
+.ql-s:hover{border-color:var(--blue);color:var(--blue);}
+.recent-card{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;}
+.rc-hdr{padding:1.1rem 1.4rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.rc-hdr h3{font-size:.95rem;font-weight:800;}
+.ritem{padding:.9rem 1.4rem;border-bottom:1px solid rgba(255,255,255,.04);display:flex;align-items:center;gap:.9rem;transition:.2s;}
+.ritem:last-child{border-bottom:none;}
+.ritem:hover{background:rgba(91,141,238,.04);}
+.ri-icon{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:.85rem;flex-shrink:0;}
+.ri-title{font-size:.84rem;font-weight:600;margin-bottom:.15rem;}
+.ri-sub{font-size:.75rem;color:var(--muted);}
+.ri-badge{margin-left:auto;padding:.2rem .65rem;border-radius:50px;font-size:.73rem;font-weight:700;}
+.empty{padding:2.5rem;text-align:center;color:var(--muted);}
+.empty i{font-size:2.5rem;opacity:.2;display:block;margin-bottom:.9rem;}
+</style>
+{% endblock %}
+{% block dash_content %}
+<!-- Welcome -->
+<div class="welcome">
+  <div>
+    <h2>Hello, {{ (current_user.full_name or current_user.username).split()[0] }}! 👋</h2>
+    <p>Your AI communication intelligence hub. Start analyzing to discover your personality.</p>
+    <div class="quick-links">
+      <a href="{{ url_for('dashboard.analyze') }}" class="ql ql-p"><i class="fas fa-brain"></i> Analyze Text</a>
+      <a href="{{ url_for('dashboard.chatbot') }}" class="ql ql-s"><i class="fas fa-comments"></i> AI Chat</a>
+      <a href="{{ url_for('dashboard.analytics') }}" class="ql ql-s"><i class="fas fa-chart-bar"></i> Analytics</a>
+      <a href="{{ url_for('dashboard.history') }}" class="ql ql-s"><i class="fas fa-history"></i> History</a>
+    </div>
+  </div>
+  <div style="font-size:4rem;opacity:.25;"><i class="fas fa-brain"></i></div>
+</div>
+
+<!-- Stats -->
+<div class="grid-4" style="margin-bottom:2rem;">
+  {% for icon,bg,color,val,lbl in [
+    ("fa-brain","rgba(91,141,238,.15)","#5b8dee",total,"Total Analyses"),
+    ("fa-heart-pulse","rgba(244,114,182,.15)","#f472b6",analyses|length,"This Session"),
+    ("fa-comments","rgba(34,211,238,.15)","#22d3ee",chats,"Chat Messages"),
+    ("fa-chart-line","rgba(139,92,246,.15)","#8b5cf6","AI","Live Engine"),
+  ] %}
+  <div class="stat-card">
+    <div class="sc-icon" style="background:{{bg}};color:{{color}};"><i class="fas {{icon}}"></i></div>
+    <div class="sc-val" style="color:{{color}};">{{val}}</div>
+    <div class="sc-lbl">{{lbl}}</div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Recent Analyses -->
+<div class="recent-card">
+  <div class="rc-hdr">
+    <h3><i class="fas fa-history" style="color:var(--blue);margin-right:.5rem;"></i>Recent Analyses</h3>
+    <a href="{{ url_for('dashboard.history') }}" style="font-size:.8rem;color:var(--blue);">View All →</a>
+  </div>
+  {% if analyses %}
+    {% set pc={'Friendly':'#22c55e','Professional':'#5b8dee','Aggressive':'#ef4444','Emotional':'#f472b6','Analytical':'#8b5cf6','Assertive':'#f59e0b','Reserved':'#6366f1','Extrovert':'#22d3ee','Introvert':'#a78bfa'} %}
+    {% for a in analyses %}
+    {% set c=pc.get(a.personality_type,'#5b8dee') %}
+    <div class="ritem">
+      <div class="ri-icon" style="background:{{c}}18;color:{{c}};"><i class="fas fa-brain"></i></div>
+      <div style="flex:1;min-width:0;">
+        <div class="ri-title">{{ a.input_text[:55] }}{% if a.input_text|length>55 %}…{% endif %}</div>
+        <div class="ri-sub">{{ a.created_at.strftime('%b %d, %Y %H:%M') }} · Emotion: {{a.emotion}} · Tone: {{a.tone}}</div>
+      </div>
+      <span class="ri-badge" style="background:{{c}}18;color:{{c}};">{{a.personality_type}}</span>
+    </div>
+    {% endfor %}
+  {% else %}
+  <div class="empty"><i class="fas fa-brain"></i><p>No analyses yet. <a href="{{ url_for('dashboard.analyze') }}" style="color:var(--blue);">Analyze your first text!</a></p></div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% block title %}Login – AI Personality Classifier{% endblock %}
+{% block extra_css %}
+<style>
+.auth-page{min-height:100vh;display:flex;background:var(--bg);}
+.auth-left{flex:1;display:flex;align-items:center;justify-content:center;padding:3rem;background:linear-gradient(145deg,rgba(91,141,238,.07),rgba(139,92,246,.09));border-right:1px solid var(--border);position:relative;overflow:hidden;}
+.auth-left::before{content:'';position:absolute;top:-30%;left:-20%;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(91,141,238,.1),transparent 65%);}
+@media(max-width:860px){.auth-left{display:none;}}
+.al-inner{position:relative;z-index:1;max-width:370px;text-align:center;}
+.al-inner .big-icon{font-size:4rem;margin-bottom:1.2rem;display:block;}
+.al-inner h2{font-size:1.8rem;font-weight:900;letter-spacing:-.025em;margin-bottom:.7rem;line-height:1.2;}
+.al-inner p{color:var(--muted2);font-size:.92rem;line-height:1.7;margin-bottom:2rem;}
+.pstack{display:flex;flex-direction:column;gap:.7rem;}
+.psi{display:flex;align-items:center;gap:.85rem;background:rgba(16,16,42,.85);border:1px solid var(--border);border-radius:13px;padding:.8rem 1rem;text-align:left;}
+.psi-ico{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:1.05rem;flex-shrink:0;}
+.psi-name{font-size:.85rem;font-weight:700;margin-bottom:.05rem;}
+.psi-lbl{font-size:.73rem;color:var(--muted);}
+.psi-score{margin-left:auto;font-size:.82rem;font-weight:800;}
+/* Form side */
+.auth-right{width:480px;display:flex;align-items:center;justify-content:center;padding:2rem;}
+@media(max-width:860px){.auth-right{width:100%;}}
+.abox{width:100%;max-width:400px;}
+.alogo{margin-bottom:2rem;}
+.alogo .ali{width:54px;height:54px;border-radius:16px;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:1.3rem;color:#fff;margin-bottom:.9rem;}
+.alogo h2{font-size:1.55rem;font-weight:900;letter-spacing:-.02em;margin-bottom:.3rem;}
+.alogo p{font-size:.875rem;color:var(--muted2);}
+.hint{background:rgba(91,141,238,.07);border:1px solid rgba(91,141,238,.18);border-radius:11px;padding:.85rem 1rem;font-size:.8rem;color:var(--muted2);margin-bottom:1.4rem;line-height:1.7;}
+.hint strong{color:var(--blue);}
+.fg{margin-bottom:1.15rem;}
+.fg label{display:block;font-size:.82rem;font-weight:600;color:var(--muted2);margin-bottom:.42rem;}
+.fi{width:100%;background:rgba(255,255,255,.04);border:1.5px solid rgba(91,141,238,.18);border-radius:11px;padding:.75rem 1rem;color:var(--text);font-size:.9rem;outline:none;transition:.25s;}
+.fi:focus{border-color:var(--blue);background:rgba(91,141,238,.04);box-shadow:0 0 0 3px rgba(91,141,238,.1);}
+.fi-wrap{position:relative;}.fi-wrap .fi{padding-right:3rem;}
+.fi-eye{position:absolute;right:.9rem;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);cursor:pointer;font-size:.9rem;transition:.2s;}
+.fi-eye:hover{color:var(--text);}
+.rem-row{display:flex;align-items:center;justify-content:space-between;font-size:.82rem;margin-bottom:1.5rem;}
+.rem-row label{display:flex;align-items:center;gap:.5rem;color:var(--muted2);cursor:pointer;}
+.rem-row a{color:var(--blue);}
+.asub{width:100%;padding:.85rem;background:var(--grad);border:none;border-radius:12px;color:#fff;font-size:1rem;font-weight:700;cursor:pointer;transition:.25s;}
+.asub:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(91,141,238,.38);}
+.afooter{text-align:center;margin-top:1.3rem;font-size:.875rem;color:var(--muted);}
+.afooter a{color:var(--blue);font-weight:600;}
+.back{display:flex;align-items:center;justify-content:center;gap:.4rem;margin-top:.8rem;font-size:.8rem;color:var(--muted);transition:.2s;}
+.back:hover{color:var(--text);}
+</style>
+{% endblock %}
+{% block content %}
+<div class="auth-page">
+  <div class="auth-left">
+    <div class="al-inner">
+      <span class="big-icon">🧠</span>
+      <h2>Know Your <span class="glow-text">Communication DNA</span></h2>
+      <p>AI-powered personality and emotion analysis to help you communicate smarter and connect on a deeper level.</p>
+      <div class="pstack">
+        {% for emoji,name,color,score in [("😊","Friendly","#22c55e","87%"),("🧠","Analytical","#8b5cf6","74%"),("💪","Assertive","#f59e0b","61%"),("🤩","Excited","#f472b6","55%")] %}
+        <div class="psi">
+          <div class="psi-ico" style="background:{{color}}18;color:{{color}};">{{emoji}}</div>
+          <div><div class="psi-name" style="color:{{color}};">{{name}}</div><div class="psi-lbl">Personality match</div></div>
+          <div class="psi-score" style="color:{{color}};">{{score}}</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  <div class="auth-right">
+    <div class="abox">
+      <div class="alogo">
+        <div class="ali"><i class="fas fa-brain"></i></div>
+        <h2>Welcome Back</h2>
+        <p>Sign in to your AI Personality Classifier account</p>
+      </div>
+      <div class="hint">
+        <strong><i class="fas fa-key"></i> Demo Admin Login</strong><br>
+        Email: <strong>admin@aipersonality.com</strong><br>
+        Password: <strong>Admin@1234</strong>
+      </div>
+      <form method="POST">
+        <div class="fg">
+          <label><i class="fas fa-envelope" style="opacity:.5;margin-right:.3rem;"></i>Email Address</label>
+          <input type="email" name="email" class="fi" placeholder="you@example.com" required autofocus>
+        </div>
+        <div class="fg">
+          <label><i class="fas fa-lock" style="opacity:.5;margin-right:.3rem;"></i>Password</label>
+          <div class="fi-wrap">
+            <input type="password" name="password" id="pw1" class="fi" placeholder="••••••••" required>
+            <button type="button" class="fi-eye" onclick="tpw('pw1','e1')"><i class="fas fa-eye" id="e1"></i></button>
+          </div>
+        </div>
+        <div class="rem-row">
+          <label><input type="checkbox" name="remember" style="accent-color:var(--blue);"> Remember me</label>
+          <a href="#">Forgot password?</a>
+        </div>
+        <button type="submit" class="asub"><i class="fas fa-sign-in-alt" style="margin-right:.4rem;"></i>Sign In</button>
+      </form>
+      <div class="afooter">Don't have an account? <a href="{{ url_for('auth.signup') }}">Create one free</a></div>
+      <a href="{{ url_for('main.index') }}" class="back"><i class="fas fa-arrow-left"></i> Back to Home</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>function tpw(id,eid){const f=document.getElementById(id),e=document.getElementById(eid);f.type=f.type==='password'?'text':'password';e.className=f.type==='password'?'fas fa-eye':'fas fa-eye-slash';}</script>
+{% endblock %}

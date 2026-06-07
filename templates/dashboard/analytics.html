@@ -1,0 +1,68 @@
+{% extends "dashboard/base_dash.html" %}
+{% block page_title %}Analytics{% endblock %}
+{% block dash_extra_css %}
+<style>
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;}
+.ch{padding:1.1rem 1.4rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.6rem;}
+.ch-icon{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.8rem;}
+.ch h3{font-size:.93rem;font-weight:800;}
+.cb{padding:1.4rem;}
+.empty{padding:3rem;text-align:center;color:var(--muted);}
+.empty i{font-size:2.5rem;opacity:.18;display:block;margin-bottom:.9rem;}
+</style>
+{% endblock %}
+{% block dash_content %}
+<!-- Stats row -->
+<div class="grid-4" style="margin-bottom:2rem;">
+  {% for icon,bg,color,val,lbl in [
+    ("fa-layer-group","rgba(91,141,238,.15)","#5b8dee",total,"Total Analyses"),
+    ("fa-user-tag","rgba(139,92,246,.15)","#8b5cf6",personality_counts|length,"Personality Types"),
+    ("fa-heart-pulse","rgba(244,114,182,.15)","#f472b6",emotion_counts|length,"Emotions Detected"),
+    ("fa-chart-line","rgba(34,211,238,.15)","#22d3ee","Live","AI Engine"),
+  ] %}
+  <div class="stat-card">
+    <div class="sc-icon" style="background:{{bg}};color:{{color}};"><i class="fas {{icon}}"></i></div>
+    <div class="sc-val" style="color:{{color}};">{{val}}</div>
+    <div class="sc-lbl">{{lbl}}</div>
+  </div>
+  {% endfor %}
+</div>
+
+{% if total > 0 %}
+<div class="grid-2" style="margin-bottom:1.5rem;">
+  <div class="chart-card">
+    <div class="ch"><div class="ch-icon" style="background:rgba(91,141,238,.15);color:var(--blue);"><i class="fas fa-brain"></i></div><h3>Personality Distribution</h3></div>
+    <div class="cb"><canvas id="pChart" height="260"></canvas></div>
+  </div>
+  <div class="chart-card">
+    <div class="ch"><div class="ch-icon" style="background:rgba(244,114,182,.15);color:var(--pink);"><i class="fas fa-heart-pulse"></i></div><h3>Emotion Distribution</h3></div>
+    <div class="cb"><canvas id="eChart" height="260"></canvas></div>
+  </div>
+</div>
+<div class="chart-card" style="margin-bottom:1.5rem;">
+  <div class="ch"><div class="ch-icon" style="background:rgba(139,92,246,.15);color:var(--purple);"><i class="fas fa-chart-radar"></i></div><h3>Personality Radar</h3></div>
+  <div class="cb" style="max-width:420px;margin:0 auto;"><canvas id="rChart" height="320"></canvas></div>
+</div>
+{% else %}
+<div class="chart-card"><div class="empty"><i class="fas fa-chart-bar"></i><p>No data yet. <a href="{{ url_for('dashboard.analyze') }}" style="color:var(--blue);">Analyze some text</a> to see your analytics.</p></div></div>
+{% endif %}
+{% endblock %}
+{% block extra_js %}
+{% if total > 0 %}
+<script>
+const pLabels={{ personality_counts.keys()|list|tojson }};
+const pData  ={{ personality_counts.values()|list|tojson }};
+const eLabels={{ emotion_counts.keys()|list|tojson }};
+const eData  ={{ emotion_counts.values()|list|tojson }};
+const pal=['#5b8dee','#8b5cf6','#ef4444','#f472b6','#22d3ee','#f59e0b','#22c55e','#ec4899','#a78bfa'];
+const tOpts={plugins:{legend:{labels:{color:'#7680a8',font:{size:12}}}},scales:{x:{ticks:{color:'#7680a8'},grid:{color:'rgba(255,255,255,.04)'}},y:{ticks:{color:'#7680a8'},grid:{color:'rgba(255,255,255,.04)'}}}};
+
+new Chart(document.getElementById('pChart'),{type:'doughnut',data:{labels:pLabels,datasets:[{data:pData,backgroundColor:pal.slice(0,pLabels.length),borderWidth:0,hoverOffset:8}]},options:{cutout:'62%',plugins:{legend:{labels:{color:'#7680a8'}}}}});
+new Chart(document.getElementById('eChart'),{type:'bar',data:{labels:eLabels,datasets:[{label:'Count',data:eData,backgroundColor:pal.slice(0,eLabels.length),borderRadius:8,borderSkipped:false}]},options:{...tOpts,plugins:{legend:{display:false}}}});
+
+const allP=['Friendly','Professional','Aggressive','Emotional','Analytical','Assertive'];
+const rD=allP.map(p=>pData[pLabels.indexOf(p)]||0);
+new Chart(document.getElementById('rChart'),{type:'radar',data:{labels:allP,datasets:[{label:'Your Style',data:rD,backgroundColor:'rgba(91,141,238,.15)',borderColor:'#5b8dee',pointBackgroundColor:'#5b8dee',borderWidth:2,pointRadius:4}]},options:{plugins:{legend:{labels:{color:'#7680a8'}}},scales:{r:{ticks:{display:false,backdropColor:'transparent'},grid:{color:'rgba(255,255,255,.08)'},pointLabels:{color:'#9aa3c0',font:{size:12}}}}}});
+</script>
+{% endif %}
+{% endblock %}

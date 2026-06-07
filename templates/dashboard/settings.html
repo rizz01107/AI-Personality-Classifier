@@ -1,0 +1,67 @@
+{% extends "dashboard/base_dash.html" %}
+{% block page_title %}Settings{% endblock %}
+{% block dash_extra_css %}
+<style>
+.settings-grid{display:grid;grid-template-columns:260px 1fr;gap:1.5rem;align-items:start;}
+@media(max-width:768px){.settings-grid{grid-template-columns:1fr;}}
+.profile-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:1.8rem;text-align:center;}
+.pa{width:80px;height:80px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:1.8rem;font-weight:900;margin:0 auto 1rem;box-shadow:0 0 0 4px rgba(91,141,238,.15);color:#fff;}
+.pname{font-size:1.05rem;font-weight:800;margin-bottom:.2rem;}
+.pemail{font-size:.8rem;color:var(--muted2);}
+.prole{display:inline-block;margin-top:.6rem;padding:.2rem .8rem;border-radius:50px;font-size:.73rem;font-weight:700;background:rgba(91,141,238,.12);border:1px solid rgba(91,141,238,.22);color:var(--blue);}
+.pstats{display:flex;justify-content:center;gap:1.5rem;margin-top:1.2rem;padding-top:1.2rem;border-top:1px solid var(--border);}
+.pst .v{font-size:1.2rem;font-weight:900;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.pst .l{font-size:.72rem;color:var(--muted);margin-top:.15rem;}
+.form-card{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;}
+.fc-hdr{padding:1.1rem 1.4rem;border-bottom:1px solid var(--border);}
+.fc-hdr h3{font-size:.95rem;font-weight:800;}
+.fc-body{padding:1.5rem;}
+.fg{margin-bottom:1.2rem;}
+.fg label{display:block;font-size:.82rem;font-weight:600;color:var(--muted2);margin-bottom:.42rem;}
+.fi{width:100%;background:rgba(255,255,255,.04);border:1.5px solid rgba(91,141,238,.16);border-radius:11px;padding:.72rem 1rem;color:var(--text);font-size:.9rem;outline:none;transition:.25s;}
+.fi:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(91,141,238,.1);}
+.fi:disabled{opacity:.45;cursor:not-allowed;}
+.save-btn{padding:.72rem 2rem;background:var(--grad);border:none;border-radius:11px;color:#fff;font-size:.95rem;font-weight:700;cursor:pointer;transition:.25s;}
+.save-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(91,141,238,.35);}
+</style>
+{% endblock %}
+{% block dash_content %}
+<div class="settings-grid">
+  <!-- Profile card -->
+  <div class="profile-card">
+    <div class="pa">{{ (current_user.full_name or current_user.username)[0]|upper }}</div>
+    <div class="pname">{{ current_user.full_name or current_user.username }}</div>
+    <div class="pemail">{{ current_user.email }}</div>
+    <span class="prole">{{ current_user.role|capitalize }}</span>
+    <div class="pstats">
+      <div class="pst"><div class="v">{{ current_user.analyses|length }}</div><div class="l">Analyses</div></div>
+      <div class="pst"><div class="v">{{ current_user.chat_messages|length }}</div><div class="l">Chats</div></div>
+    </div>
+  </div>
+  <!-- Form card -->
+  <div class="form-card">
+    <div class="fc-hdr"><h3><i class="fas fa-user-edit" style="color:var(--blue);margin-right:.5rem;"></i>Edit Profile</h3></div>
+    <div class="fc-body">
+      <form method="POST">
+        <div class="fg">
+          <label>Full Name</label>
+          <input type="text" name="full_name" class="fi" value="{{ current_user.full_name or '' }}" placeholder="Your full name">
+        </div>
+        <div class="fg">
+          <label>Username <span style="color:var(--muted);font-size:.75rem;">(cannot change)</span></label>
+          <input type="text" class="fi" value="{{ current_user.username }}" disabled>
+        </div>
+        <div class="fg">
+          <label>Email Address <span style="color:var(--muted);font-size:.75rem;">(cannot change)</span></label>
+          <input type="email" class="fi" value="{{ current_user.email }}" disabled>
+        </div>
+        <div class="fg">
+          <label>Member Since</label>
+          <input type="text" class="fi" value="{{ current_user.created_at.strftime('%B %d, %Y') }}" disabled>
+        </div>
+        <button type="submit" class="save-btn"><i class="fas fa-save" style="margin-right:.4rem;"></i>Save Changes</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
